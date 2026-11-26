@@ -1,0 +1,19 @@
+[build]
+  # The deployable site is the Vite + React app in portfolio-frontend/.
+  # (portfolio-backend/ is a Spring Boot service and is not deployed by Netlify.)
+  base = "portfolio-frontend"
+  # Install from the lockfile first (including devDependencies, where Vite lives)
+  # so the build never depends on a pre-existing node_modules folder.
+  command = "npm ci --include=dev --no-audit --no-fund && npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 requires Node ^20.19 or >=22.12.
+  NODE_VERSION = "22"
+
+# The app uses client-side routing (BrowserRouter), e.g. /admin.
+# Serve index.html for unknown paths so deep links and refreshes don't 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
