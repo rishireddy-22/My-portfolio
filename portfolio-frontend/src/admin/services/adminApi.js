@@ -7,13 +7,20 @@ import {
   mockResume
 } from '../../services/mockData';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const hasCustomBackend = Boolean(import.meta.env.VITE_API_URL);
+const isLocalhost = typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+// Pure client mode on Netlify / production without backend
+const isPureClientMode = !hasCustomBackend && !isLocalhost;
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:8080/api' : '/api');
 const TOKEN_KEY = 'portfolio_admin_token';
 const EXPIRY_KEY = 'portfolio_admin_token_expiry';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 5000,
+  timeout: isLocalhost ? 2000 : 4000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -28,11 +35,13 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor for 401 auto logout
+// Interceptor for 401 auto logout (only if not mock token)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const isMock = token && token.startsWith('mock_jwt_token_');
+    if (error.response && error.response.status === 401 && !isMock) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(EXPIRY_KEY);
       if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
@@ -57,7 +66,11 @@ const getStored = (key, fallback) => {
 };
 
 const setStored = (key, val) => {
-  localStorage.setItem(key, JSON.stringify(val));
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) {
+    console.warn(`Could not save ${key} to localStorage:`, e);
+  }
 };
 
 // Activity logger helper
@@ -77,6 +90,19 @@ const logActivity = (action, entity) => {
 /* ================= AUTH API ================= */
 
 export const login = async (username, password) => {
+  if (isPureClientMode) {
+    const savedAdmin = getStored('portfolio_admin_creds', { username: 'admin', password: 'admin123' });
+    if (username === savedAdmin.username && password === savedAdmin.password) {
+      const mockToken = 'mock_jwt_token_' + Date.now();
+      const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
+      localStorage.setItem(TOKEN_KEY, mockToken);
+      localStorage.setItem(EXPIRY_KEY, expiresAt.toString());
+      logActivity('Admin logged in', 'Security');
+      return { success: true, token: mockToken };
+    }
+    throw new Error('Invalid username or password. Default is admin / admin123');
+  }
+
   try {
     const res = await apiClient.post('/auth/login', { username, password });
     const { token } = res.data;
@@ -86,7 +112,6 @@ export const login = async (username, password) => {
     logActivity('Admin logged in', 'Security');
     return { success: true, token };
   } catch (err) {
-    // Standalone fallback: default admin / admin123
     const savedAdmin = getStored('portfolio_admin_creds', { username: 'admin', password: 'admin123' });
     if (username === savedAdmin.username && password === savedAdmin.password) {
       const mockToken = 'mock_jwt_token_' + Date.now();
@@ -118,24 +143,27 @@ export const isAuthenticated = () => {
 };
 
 export const changePassword = async (oldPassword, newPassword) => {
-  try {
-    const res = await apiClient.post('/admin/change-password', { oldPassword, newPassword });
-    logActivity('Admin password changed', 'Security');
-    return res.data;
-  } catch (err) {
-    const savedAdmin = getStored('portfolio_admin_creds', { username: 'admin', password: 'admin123' });
-    if (savedAdmin.password !== oldPassword) {
-      throw new Error('Current password does not match.');
-    }
-    setStored('portfolio_admin_creds', { ...savedAdmin, password: newPassword });
-    logActivity('Admin password changed', 'Security');
-    return { success: true, message: 'Password updated successfully!' };
+  const savedAdmin = getStored('portfolio_admin_creds', { username: 'admin', password: 'admin123' });
+  if (savedAdmin.password !== oldPassword) {
+    throw new Error('Current password does not match.');
   }
+  setStored('portfolio_admin_creds', { ...savedAdmin, password: newPassword });
+  logActivity('Admin password changed', 'Security');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.post('/admin/change-password', { oldPassword, newPassword });
+    } catch (e) {}
+  }
+  return { success: true, message: 'Password updated successfully!' };
 };
 
 /* ================= PROFILE API ================= */
 
 export const getAdminProfile = async () => {
+  if (isPureClientMode) {
+    return getStored('portfolio_profile', mockProfile);
+  }
   try {
     const res = await apiClient.get('/admin/profile');
     return res.data;
@@ -145,24 +173,27 @@ export const getAdminProfile = async () => {
 };
 
 export const updateProfile = async (profileData) => {
-  try {
-    const res = await apiClient.put('/admin/profile', profileData);
-    setStored('portfolio_profile', res.data);
-    logActivity('Profile information updated', 'Profile');
-    return res.data;
-  } catch (err) {
-    setStored('portfolio_profile', profileData);
-    logActivity('Profile information updated', 'Profile');
-    return profileData;
+  setStored('portfolio_profile', profileData);
+  logActivity('Profile information updated', 'Profile');
+
+  if (!isPureClientMode) {
+    try {
+      const res = await apiClient.put('/admin/profile', profileData);
+      return res.data;
+    } catch (err) {}
   }
+  return profileData;
 };
 
 /* ================= EDUCATION API ================= */
 
 export const getAdminEducation = async () => {
+  if (isPureClientMode) {
+    return getStored('portfolio_education', mockEducation);
+  }
   try {
     const res = await apiClient.get('/admin/education');
-    return res.data;
+    return Array.isArray(res.data) && res.data.length > 0 ? res.data : getStored('portfolio_education', mockEducation);
   } catch (err) {
     return getStored('portfolio_education', mockEducation);
   }
@@ -170,52 +201,64 @@ export const getAdminEducation = async () => {
 
 export const saveEducation = async (eduData) => {
   const isEdit = Boolean(eduData.id);
-  try {
-    const res = isEdit
-      ? await apiClient.put(`/admin/education/${eduData.id}`, eduData)
-      : await apiClient.post('/admin/education', eduData);
-    logActivity(`${isEdit ? 'Updated' : 'Added'} education: ${eduData.degree}`, 'Education');
-    return res.data;
-  } catch (err) {
-    const list = getStored('portfolio_education', mockEducation);
-    let updated;
-    if (isEdit) {
-      updated = list.map((item) => (item.id === eduData.id ? { ...item, ...eduData } : item));
-    } else {
-      const newItem = { ...eduData, id: Date.now() };
-      updated = [newItem, ...list];
-    }
-    setStored('portfolio_education', updated);
-    logActivity(`${isEdit ? 'Updated' : 'Added'} education: ${eduData.degree}`, 'Education');
-    return isEdit ? eduData : { ...eduData, id: Date.now() };
+  const list = getStored('portfolio_education', mockEducation);
+  let updated;
+  let savedItem;
+
+  if (isEdit) {
+    updated = list.map((item) => (item.id === eduData.id ? { ...item, ...eduData } : item));
+    savedItem = eduData;
+  } else {
+    savedItem = { ...eduData, id: Date.now() };
+    updated = [savedItem, ...list];
   }
+
+  setStored('portfolio_education', updated);
+  logActivity(`${isEdit ? 'Updated' : 'Added'} education: ${eduData.degree}`, 'Education');
+
+  if (!isPureClientMode) {
+    try {
+      const res = isEdit
+        ? await apiClient.put(`/admin/education/${eduData.id}`, eduData)
+        : await apiClient.post('/admin/education', eduData);
+      return res.data;
+    } catch (err) {}
+  }
+
+  return savedItem;
 };
 
 export const deleteEducation = async (id) => {
-  try {
-    await apiClient.delete(`/admin/education/${id}`);
-    logActivity(`Deleted education entry #${id}`, 'Education');
-  } catch (err) {
-    const list = getStored('portfolio_education', mockEducation);
-    const updated = list.filter((item) => item.id !== id);
-    setStored('portfolio_education', updated);
-    logActivity(`Deleted education entry #${id}`, 'Education');
+  const list = getStored('portfolio_education', mockEducation);
+  const updated = list.filter((item) => item.id !== id);
+  setStored('portfolio_education', updated);
+  logActivity(`Deleted education entry #${id}`, 'Education');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.delete(`/admin/education/${id}`);
+    } catch (err) {}
   }
 };
 
 export const reorderEducation = async (newList) => {
   setStored('portfolio_education', newList);
-  try {
-    await apiClient.put('/admin/education/reorder', newList);
-  } catch (e) {}
+  if (!isPureClientMode) {
+    try {
+      await apiClient.put('/admin/education/reorder', newList);
+    } catch (e) {}
+  }
 };
 
 /* ================= SKILLS API ================= */
 
 export const getAdminSkills = async () => {
+  if (isPureClientMode) {
+    return getStored('portfolio_skills', mockSkills);
+  }
   try {
     const res = await apiClient.get('/admin/skills');
-    return res.data;
+    return Array.isArray(res.data) && res.data.length > 0 ? res.data : getStored('portfolio_skills', mockSkills);
   } catch (err) {
     return getStored('portfolio_skills', mockSkills);
   }
@@ -224,8 +267,7 @@ export const getAdminSkills = async () => {
 export const saveSkill = async (skillData) => {
   const isEdit = Boolean(skillData.id);
   const categories = getStored('portfolio_skills', mockSkills);
-  
-  // Flatten or update in categorized list
+
   let found = false;
   const updatedCategories = categories.map((cat) => {
     if (cat.category === skillData.category) {
@@ -238,14 +280,12 @@ export const saveSkill = async (skillData) => {
       found = true;
       return { ...cat, skills: catSkills };
     } else if (isEdit) {
-      // Remove from old category if category changed
       return { ...cat, skills: (cat.skills || []).filter((s) => s.id !== skillData.id) };
     }
     return cat;
   });
 
   if (!found) {
-    // New category
     updatedCategories.push({
       category: skillData.category,
       skills: [{ ...skillData, id: Date.now() }]
@@ -254,6 +294,16 @@ export const saveSkill = async (skillData) => {
 
   setStored('portfolio_skills', updatedCategories);
   logActivity(`${isEdit ? 'Updated' : 'Added'} skill: ${skillData.name}`, 'Skills');
+
+  if (!isPureClientMode) {
+    try {
+      const res = isEdit
+        ? await apiClient.put(`/admin/skills/${skillData.id}`, skillData)
+        : await apiClient.post('/admin/skills', skillData);
+      return res.data;
+    } catch (e) {}
+  }
+
   return skillData;
 };
 
@@ -266,14 +316,23 @@ export const deleteSkill = async (id) => {
 
   setStored('portfolio_skills', updated);
   logActivity(`Deleted skill #${id}`, 'Skills');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.delete(`/admin/skills/${id}`);
+    } catch (e) {}
+  }
 };
 
 /* ================= PROJECTS API ================= */
 
 export const getAdminProjects = async () => {
+  if (isPureClientMode) {
+    return getStored('portfolio_projects', mockProjects);
+  }
   try {
     const res = await apiClient.get('/admin/projects');
-    return res.data;
+    return Array.isArray(res.data) && res.data.length > 0 ? res.data : getStored('portfolio_projects', mockProjects);
   } catch (err) {
     return getStored('portfolio_projects', mockProjects);
   }
@@ -281,42 +340,49 @@ export const getAdminProjects = async () => {
 
 export const saveProject = async (projectData) => {
   const isEdit = Boolean(projectData.id);
-  try {
-    const res = isEdit
-      ? await apiClient.put(`/admin/projects/${projectData.id}`, projectData)
-      : await apiClient.post('/admin/projects', projectData);
-    logActivity(`${isEdit ? 'Updated' : 'Added'} project: ${projectData.title}`, 'Projects');
-    return res.data;
-  } catch (err) {
-    const list = getStored('portfolio_projects', mockProjects);
-    let updated;
-    if (isEdit) {
-      updated = list.map((item) => (item.id === projectData.id ? { ...item, ...projectData } : item));
-    } else {
-      const newProj = {
-        ...projectData,
-        id: Date.now(),
-        published: projectData.published ?? true,
-        featured: projectData.featured ?? false,
-        createdAt: new Date().toISOString()
-      };
-      updated = [newProj, ...list];
-    }
-    setStored('portfolio_projects', updated);
-    logActivity(`${isEdit ? 'Updated' : 'Added'} project: ${projectData.title}`, 'Projects');
-    return isEdit ? projectData : updated[0];
+  const list = getStored('portfolio_projects', mockProjects);
+  let updated;
+  let savedProj;
+
+  if (isEdit) {
+    updated = list.map((item) => (item.id === projectData.id ? { ...item, ...projectData } : item));
+    savedProj = projectData;
+  } else {
+    savedProj = {
+      ...projectData,
+      id: Date.now(),
+      published: projectData.published ?? true,
+      featured: projectData.featured ?? false,
+      createdAt: new Date().toISOString()
+    };
+    updated = [savedProj, ...list];
   }
+
+  setStored('portfolio_projects', updated);
+  logActivity(`${isEdit ? 'Updated' : 'Added'} project: ${projectData.title}`, 'Projects');
+
+  if (!isPureClientMode) {
+    try {
+      const res = isEdit
+        ? await apiClient.put(`/admin/projects/${projectData.id}`, projectData)
+        : await apiClient.post('/admin/projects', projectData);
+      return res.data;
+    } catch (err) {}
+  }
+
+  return savedProj;
 };
 
 export const deleteProject = async (id) => {
-  try {
-    await apiClient.delete(`/admin/projects/${id}`);
-    logActivity(`Deleted project #${id}`, 'Projects');
-  } catch (err) {
-    const list = getStored('portfolio_projects', mockProjects);
-    const updated = list.filter((p) => p.id !== id);
-    setStored('portfolio_projects', updated);
-    logActivity(`Deleted project #${id}`, 'Projects');
+  const list = getStored('portfolio_projects', mockProjects);
+  const updated = list.filter((p) => p.id !== id);
+  setStored('portfolio_projects', updated);
+  logActivity(`Deleted project #${id}`, 'Projects');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.delete(`/admin/projects/${id}`);
+    } catch (err) {}
   }
 };
 
@@ -325,19 +391,32 @@ export const toggleProjectPublish = async (id) => {
   const updated = list.map((p) => (p.id === id ? { ...p, published: !p.published } : p));
   setStored('portfolio_projects', updated);
   logActivity(`Toggled publish status for project #${id}`, 'Projects');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.patch(`/admin/projects/${id}/publish`);
+    } catch (e) {}
+  }
   return updated.find((p) => p.id === id);
 };
 
 /* ================= RESUME API ================= */
 
 export const getAdminResume = async () => {
+  if (isPureClientMode) {
+    const active = getStored('portfolio_resume', mockResume);
+    const history = getStored('portfolio_resume_history', [
+      { id: 1, fileName: 'Rishi_Swar_Resume.pdf', fileUrl: '/resume.pdf', uploadedAt: '2026-11-26T18:29:00Z', active: true }
+    ]);
+    return { active, history };
+  }
   try {
     const res = await apiClient.get('/admin/resume');
     return res.data;
   } catch (err) {
     const active = getStored('portfolio_resume', mockResume);
     const history = getStored('portfolio_resume_history', [
-      { id: 1, fileName: 'Rishi_Swar_Resume.pdf', fileUrl: '/resume.pdf', uploadedAt: '2026-11-20T10:00:00Z', active: true }
+      { id: 1, fileName: 'Rishi_Swar_Resume.pdf', fileUrl: '/resume.pdf', uploadedAt: '2026-11-26T18:29:00Z', active: true }
     ]);
     return { active, history };
   }
@@ -368,7 +447,7 @@ export const uploadResumeFile = async (file) => {
   };
 
   const history = getStored('portfolio_resume_history', [
-    { id: 1, fileName: 'Rishi_Swar_Resume.pdf', fileUrl: '/resume.pdf', uploadedAt: '2026-11-20T10:00:00Z', active: false }
+    { id: 1, fileName: 'Rishi_Swar_Resume.pdf', fileUrl: '/resume.pdf', uploadedAt: '2026-11-26T18:29:00Z', active: false }
   ]).map((r) => ({ ...r, active: false }));
 
   const updatedHistory = [newResume, ...history];
@@ -379,6 +458,17 @@ export const uploadResumeFile = async (file) => {
   });
 
   logActivity(`Uploaded new resume: ${file.name}`, 'Resume');
+
+  if (!isPureClientMode) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await apiClient.post('/admin/resume/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    } catch (e) {}
+  }
+
   return newResume;
 };
 
@@ -396,17 +486,41 @@ export const activateResume = async (id) => {
     });
     logActivity(`Activated resume version: ${activeItem.fileName}`, 'Resume');
   }
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.put(`/admin/resume/${id}/activate`);
+    } catch (e) {}
+  }
 };
 
 export const deleteResume = async (id) => {
   const history = getStored('portfolio_resume_history', []).filter((r) => r.id !== id);
   setStored('portfolio_resume_history', history);
   logActivity(`Deleted resume version #${id}`, 'Resume');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.delete(`/admin/resume/${id}`);
+    } catch (e) {}
+  }
 };
 
 /* ================= CONTACT MESSAGES API ================= */
 
 export const getAdminMessages = async () => {
+  if (isPureClientMode) {
+    return getStored('portfolio_messages', [
+      {
+        id: 1,
+        name: 'Alex Johnson',
+        email: 'alex@analytics-corp.com',
+        message: 'Hi Rishi, loved your Power BI dashboard case study. We are looking for a Data Analyst to join our team.',
+        createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+        read: false
+      }
+    ]);
+  }
   try {
     const res = await apiClient.get('/admin/messages');
     return res.data;
@@ -428,6 +542,12 @@ export const markMessageRead = async (id) => {
   const list = getStored('portfolio_messages', []);
   const updated = list.map((m) => (m.id === id ? { ...m, read: true } : m));
   setStored('portfolio_messages', updated);
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.put(`/admin/messages/${id}/read`);
+    } catch (e) {}
+  }
 };
 
 export const deleteMessage = async (id) => {
@@ -435,6 +555,12 @@ export const deleteMessage = async (id) => {
   const updated = list.filter((m) => m.id !== id);
   setStored('portfolio_messages', updated);
   logActivity(`Deleted contact message #${id}`, 'Messages');
+
+  if (!isPureClientMode) {
+    try {
+      await apiClient.delete(`/admin/messages/${id}`);
+    } catch (e) {}
+  }
 };
 
 /* ================= DASHBOARD STATS API ================= */
@@ -448,7 +574,6 @@ export const getDashboardStats = async () => {
   const visits = getStored('portfolio_visit_count', 42);
   const activities = getStored('portfolio_activities', []);
 
-  // Total skills counter
   let totalSkills = 0;
   skills.forEach((g) => {
     totalSkills += (g.skills || []).length;

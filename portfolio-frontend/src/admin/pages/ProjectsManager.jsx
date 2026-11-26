@@ -132,13 +132,17 @@ export default function ProjectsManager() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData((prev) => ({
-        ...prev,
-        thumbnailUrl: url,
-        images: [url, ...prev.images]
-      }));
-      showToast('Image preview updated!');
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = reader.result;
+        setFormData((prev) => ({
+          ...prev,
+          thumbnailUrl: url,
+          images: [url, ...prev.images]
+        }));
+        showToast('Image uploaded!');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
