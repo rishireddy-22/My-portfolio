@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141414"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="chartSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Grid lines -->
+  <g stroke="#ffffff" stroke-opacity="0.05" stroke-width="1">
+    <line x1="50" y1="100" x2="750" y2="100"/>
+    <line x1="50" y1="200" x2="750" y2="200"/>
+    <line x1="50" y1="300" x2="750" y2="300"/>
+    <line x1="50" y1="400" x2="750" y2="400"/>
+    <line x1="200" y1="50" x2="200" y2="450"/>
+    <line x1="400" y1="50" x2="400" y2="450"/>
+    <line x1="600" y1="50" x2="600" y2="450"/>
+  </g>
+
+  <!-- Header Bar -->
+  <rect x="50" y="30" width="700" height="40" rx="8" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.1"/>
+  <circle cx="80" cy="50" r="6" fill="#ffffff" fill-opacity="0.4"/>
+  <rect x="105" y="45" width="140" height="10" rx="4" fill="#ffffff" fill-opacity="0.7"/>
+  <rect x="620" y="44" width="100" height="12" rx="6" fill="#ffffff" fill-opacity="0.15"/>
+
+  <!-- KPI Cards -->
+  <g transform="translate(50, 90)">
+    <rect width="210" height="90" rx="12" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="20" y="32" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="12">TOTAL REVENUE</text>
+    <text x="20" y="65" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="22">$2.48M</text>
+    <text x="145" y="65" fill="#e5e5e5" font-family="Inter, sans-serif" font-size="12">+18.4%</text>
+  </g>
+
+  <g transform="translate(295, 90)">
+    <rect width="210" height="90" rx="12" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="20" y="32" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="12">AVERAGE ORDER VALUE</text>
+    <text x="20" y="65" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="22">$142.50</text>
+    <text x="155" y="65" fill="#e5e5e5" font-family="Inter, sans-serif" font-size="12">+5.2%</text>
+  </g>
+
+  <g transform="translate(540, 90)">
+    <rect width="210" height="90" rx="12" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="20" y="32" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="12">CONVERSION RATE</text>
+    <text x="20" y="65" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="22">3.85%</text>
+    <text x="155" y="65" fill="#e5e5e5" font-family="Inter, sans-serif" font-size="12">+1.1%</text>
+  </g>
+
+  <!-- Large Main Chart -->
+  <g transform="translate(50, 205)">
+    <rect width="455" height="245" rx="14" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="24" y="32" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600">Monthly Sales Velocity & Target</text>
+    
+    <!-- Area Chart Path -->
+    <path d="M 30 190 Q 90 140, 150 160 T 270 90 T 390 110 T 430 50 L 430 200 L 30 200 Z" fill="url(#chartSheen)"/>
+    <path d="M 30 190 Q 90 140, 150 160 T 270 90 T 390 110 T 430 50" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+    <circle cx="270" cy="90" r="4.5" fill="#ffffff"/>
+    <circle cx="430" cy="50" r="4.5" fill="#ffffff"/>
+  </g>
+
+  <!-- Regional Category Bars -->
+  <g transform="translate(530, 205)">
+    <rect width="220" height="245" rx="14" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="20" y="32" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600">Product Categories</text>
+    
+    <!-- Bar 1 -->
+    <text x="20" y="70" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Electronics</text>
+    <rect x="20" y="80" width="180" height="12" rx="6" fill="#ffffff" fill-opacity="0.1"/>
+    <rect x="20" y="80" width="150" height="12" rx="6" fill="#ffffff" fill-opacity="0.85"/>
+
+    <!-- Bar 2 -->
+    <text x="20" y="125" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Apparel</text>
+    <rect x="20" y="135" width="180" height="12" rx="6" fill="#ffffff" fill-opacity="0.1"/>
+    <rect x="20" y="135" width="115" height="12" rx="6" fill="#ffffff" fill-opacity="0.6"/>
+
+    <!-- Bar 3 -->
+    <text x="20" y="180" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Home & Office</text>
+    <rect x="20" y="190" width="180" height="12" rx="6" fill="#ffffff" fill-opacity="0.1"/>
+    <rect x="20" y="190" width="90" height="12" rx="6" fill="#ffffff" fill-opacity="0.4"/>
+  </g>
+</svg>

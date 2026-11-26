@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141414"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bgGrad3)"/>
+
+  <!-- SQL Window Card -->
+  <g transform="translate(50, 40)">
+    <rect width="700" height="180" rx="14" fill="url(#cardGrad3)" stroke="#ffffff" stroke-opacity="0.15"/>
+    <!-- Terminal header dots -->
+    <circle cx="30" cy="25" r="5" fill="#ffffff" fill-opacity="0.6"/>
+    <circle cx="50" cy="25" r="5" fill="#ffffff" fill-opacity="0.3"/>
+    <circle cx="70" cy="25" r="5" fill="#ffffff" fill-opacity="0.2"/>
+    <text x="100" y="29" fill="#a3a3a3" font-family="monospace" font-size="12">query_optimization_rfm_segmentation.sql</text>
+    
+    <!-- Code Snippet -->
+    <text x="30" y="70" fill="#ffffff" font-family="monospace" font-size="12">WITH customer_rfm AS (</text>
+    <text x="50" y="95" fill="#a3a3a3" font-family="monospace" font-size="12">  SELECT customer_id, NTILE(5) OVER(ORDER BY MAX(order_date)) AS recency_score,</text>
+    <text x="50" y="120" fill="#a3a3a3" font-family="monospace" font-size="12">  COUNT(order_id) AS frequency, SUM(order_total) AS monetary</text>
+    <text x="30" y="145" fill="#ffffff" font-family="monospace" font-size="12">) SELECT segment, COUNT(*) FROM segmented_customers GROUP BY 1;</text>
+  </g>
+
+  <!-- Query Output Metrics -->
+  <g transform="translate(50, 240)">
+    <rect width="335" height="210" rx="14" fill="url(#cardGrad3)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="24" y="34" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600">Basket Association (Lift)</text>
+    
+    <g transform="translate(24, 60)">
+      <text x="0" y="15" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Item A + Item B</text>
+      <text x="220" y="15" fill="#ffffff" font-family="Inter, sans-serif" font-weight="600" font-size="12">3.4x Lift</text>
+      <rect x="0" y="25" width="280" height="6" rx="3" fill="#ffffff" fill-opacity="0.1"/>
+      <rect x="0" y="25" width="220" height="6" rx="3" fill="#ffffff" fill-opacity="0.8"/>
+
+      <text x="0" y="55" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Audio Gear + Case</text>
+      <text x="220" y="55" fill="#ffffff" font-family="Inter, sans-serif" font-weight="600" font-size="12">2.8x Lift</text>
+      <rect x="0" y="65" width="280" height="6" rx="3" fill="#ffffff" fill-opacity="0.1"/>
+      <rect x="0" y="65" width="180" height="6" rx="3" fill="#ffffff" fill-opacity="0.6"/>
+
+      <text x="0" y="95" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Laptop + Cable</text>
+      <text x="220" y="95" fill="#ffffff" font-family="Inter, sans-serif" font-weight="600" font-size="12">2.1x Lift</text>
+      <rect x="0" y="105" width="280" height="6" rx="3" fill="#ffffff" fill-opacity="0.1"/>
+      <rect x="0" y="105" width="140" height="6" rx="3" fill="#ffffff" fill-opacity="0.4"/>
+    </g>
+  </g>
+
+  <g transform="translate(415, 240)">
+    <rect width="335" height="210" rx="14" fill="url(#cardGrad3)" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="24" y="34" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="600">Inventory Velocity Optimization</text>
+    
+    <g transform="translate(24, 70)">
+      <circle cx="45" cy="50" r="35" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="8"/>
+      <circle cx="45" cy="50" r="35" fill="none" stroke="#ffffff" stroke-width="8" stroke-dasharray="160 220" stroke-linecap="round"/>
+      <text x="35" y="55" fill="#ffffff" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="16">94%</text>
+
+      <text x="105" y="35" fill="#ffffff" font-family="Inter, sans-serif" font-weight="600" font-size="13">Stockout Prevention</text>
+      <text x="105" y="58" fill="#a3a3a3" font-family="Inter, sans-serif" font-size="11">Window functions & safety stock reorder thresholds</text>
+    </g>
+  </g>
+</svg>
