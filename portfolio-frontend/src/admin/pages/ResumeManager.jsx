@@ -192,15 +192,27 @@ export default function ResumeManager() {
                 </span>
               </div>
 
-              <a
-                href={activeResume?.fileUrl || '/resume.pdf'}
-                download="Rishi_Swar_Resume.pdf"
-                className="btn btn-secondary"
-                style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}
-              >
-                <FiDownload size={15} />
-                <span>Download</span>
-              </a>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <a
+                  href={activeResume?.fileUrl || '/resume.pdf'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}
+                >
+                  <FiFileText size={15} />
+                  <span>Open</span>
+                </a>
+                <a
+                  href={activeResume?.fileUrl || '/resume.pdf'}
+                  download="Rishi_Swar_Resume.pdf"
+                  className="btn btn-primary"
+                  style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}
+                >
+                  <FiDownload size={15} />
+                  <span>Download</span>
+                </a>
+              </div>
             </div>
 
             <div

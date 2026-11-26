@@ -10,16 +10,16 @@
 export const mockProfile = {
   name: "Rishi Swar",
   initials: "RS",
-  title: "Data Analyst & BI Specialist",
+  title: "Data Analyst • SQL • Python • Power BI",
   tagline: "Bridging the gap between raw numbers and decisive business strategy through SQL modeling, exploratory analysis, and interactive dashboard storytelling.",
-  bio: "Aspiring Data Analyst currently pursuing my Master of Computer Applications (MCA) with a strong foundation in computer applications and business acumen from my B.Com studies. Driven by curiosity, I specialize in dissecting complex business datasets, uncovering underlying trends, crafting intuitive dashboards in Power BI and Tableau, and writing high-efficiency SQL queries that fuel informed decision-making.",
+  bio: "MCA student with a strong base in SQL, Python and data visualization. I clean raw data, explore it to find patterns, and turn it into dashboards and simple insights that help people make decisions. Looking for a Data Analyst internship or entry-level role where I can learn, contribute and grow.",
   photoUrl: "/profile.png",
   email: "rishiswar22@gmail.com",
   phone: "+91 7569541880",
   phoneDisplay: "+91 75695 41880",
   location: "Anantapur, Andhra Pradesh, India",
-  linkedin: "https://www.linkedin.com/in/rishi-swar-bb5468450",
-  github: "https://github.com/your-username", // Replace with your GitHub profile
+  linkedin: "https://www.linkedin.com/in/rishi-swar",
+  github: "https://github.com/rishireddy-22",
   typingRoles: [
     "Data Analyst",
     "SQL Enthusiast",
@@ -106,46 +106,66 @@ export const mockSkills = [
 export const mockProjects = [
   {
     id: 1,
-    title: "Retail Sales Performance Dashboard",
+    title: "Sales Dashboard",
     category: "Power BI",
-    techStack: ["SQL", "Power BI", "Excel", "Data Modeling", "DAX"],
+    techStack: ["Power BI", "Excel", "SQL", "DAX", "Data Modeling"],
     thumbnailUrl: "/projects/project1_retail_sales_dashboard.png",
     images: ["/projects/project1_retail_sales_dashboard.png"],
-    shortDescription: "Interactive sales dashboard built to track $4.82M revenue, profit margins (18.4%), and regional product velocity.",
-    fullDescription: "An interactive sales dashboard built to help a retail business understand where its revenue and profit come from. I cleaned and joined sales, product and customer tables using SQL, then built a Power BI dashboard tracking total revenue, profit margin, order volume and average order value. The analysis showed a strong seasonal peak in Q4. Electronics was the top revenue category, and profit margins differed noticeably between regions. The dashboard lets managers filter by month, category and region to decide on stock levels and promotions.",
-    problemStatement: "The business needed clear visibility into $4.82M across multiple retail channels to identify revenue streams, product margin variances, and inventory demand peaks.",
-    approach: "Cleaned and joined sales, product, and customer relational tables in SQL, established star schema data modeling, and crafted a multi-metric Power BI dashboard with dynamic filtering by month, category, and sales region.",
-    toolsUsed: ["SQL", "Power BI", "Excel"],
+    shortDescription: "Interactive Power BI & Excel dashboard tracking sales by product, region, and month with DAX measures and filters.",
+    fullDescription: "Built an interactive dashboard to track sales by product, region and month. Cleaned the data and created DAX measures, slicers and filters to highlight top products and weak regions to support business decisions.",
+    problemStatement: "The business needed clear visibility into retail sales performance across multiple channels to identify revenue streams, product margin variances, and inventory demand peaks.",
+    approach: "Cleaned and joined sales, product, and customer relational tables in SQL and Excel, established star schema data modeling, and crafted a multi-metric Power BI dashboard with dynamic filtering by month, category, and sales region.",
+    toolsUsed: ["Power BI", "Excel", "SQL", "DAX"],
     insights: [
-      "Demonstrated a strong seasonal peak in Q4, reaching nearly $500K in monthly revenue in December.",
-      "Identified Electronics as the primary revenue generator ($1.6M+), followed by Clothing ($1.2M) and Home items.",
-      "Highlighted noticeable regional profit margin differences (North at 22% vs East at 15%), enabling targeted regional stock levels and promotional pricing."
+      "Built an interactive dashboard to track sales by product, region and month.",
+      "Cleaned the data and created DAX measures, slicers and dynamic filters.",
+      "Highlighted top revenue products and weak regions to support inventory decisions and promotional pricing."
     ],
     liveUrl: "https://app.powerbi.com",
-    githubUrl: "https://github.com/your-username/retail-sales-dashboard"
+    githubUrl: "https://github.com/rishireddy-22/sales-dashboard"
   },
   {
     id: 2,
-    title: "Customer Churn Analysis & Prediction",
+    title: "Customer Churn Analysis",
     category: "Python",
-    techStack: ["Python", "Pandas", "Matplotlib", "Scikit-Learn", "Jupyter Notebook"],
+    techStack: ["Python", "Pandas", "Matplotlib", "Seaborn", "Jupyter Notebook"],
     thumbnailUrl: "/projects/project2_customer_churn_analysis.png",
     images: ["/projects/project2_customer_churn_analysis.png"],
-    shortDescription: "End-to-end churn analysis & 81% accuracy predictive classification model identifying retention drivers across 7,000+ accounts.",
-    fullDescription: "An end-to-end analysis of why telecom customers cancel their service, covering about 7,000 customers. I cleaned the data, explored churn patterns, and trained a classification model to predict which customers are likely to leave. Churn was highest among month-to-month contract customers and in the first year of service. Contract type, tenure and monthly charges were the strongest churn drivers. The model reached about 81% accuracy and flags at-risk customers so the business can target them with retention offers.",
-    problemStatement: "A telecommunications business was facing a 26.5% churn rate putting $1.4M revenue at risk without proactive classification of departing subscribers.",
-    approach: "Cleaned and prepared 7,043 customer records, explored tenure and contract churn correlations, and trained a predictive machine learning classification model to flag at-risk subscribers.",
-    toolsUsed: ["Python (Pandas, Matplotlib, Scikit-learn)", "Jupyter Notebook"],
+    shortDescription: "Exploratory customer churn analysis in Python uncovering cancellation drivers and retention opportunities.",
+    fullDescription: "Analysed customer data to find why customers leave. Cleaned the dataset and explored it with charts to spot patterns, and summarised key churn factors in a short insights report.",
+    problemStatement: "A telecommunications business was facing customer attrition without proactive classification and understanding of departing subscribers.",
+    approach: "Cleaned and prepared customer records, explored tenure and contract correlations using Pandas and Matplotlib, and summarized churn distributions.",
+    toolsUsed: ["Python (Pandas, Matplotlib)", "Jupyter Notebook"],
     insights: [
-      "Discovered churn was dramatically highest (>40%) among month-to-month contract customers compared to one-year (11%) and two-year (<4%) contracts.",
-      "Identified steep churn risk within the first year of customer tenure (months 1–12) before retention stabilizes.",
-      "Model achieved 81% prediction accuracy, confirming contract type, tenure, and monthly charges as the strongest drivers to target with proactive retention incentives."
+      "Analysed customer data to find why customers leave.",
+      "Cleaned the dataset and explored it with charts to spot patterns.",
+      "Summarised key churn factors in a short actionable insights report."
     ],
-    liveUrl: "https://github.com/your-username/customer-churn-analysis",
-    githubUrl: "https://github.com/your-username/customer-churn-analysis"
+    liveUrl: "https://github.com/rishireddy-22/customer-churn-analysis",
+    githubUrl: "https://github.com/rishireddy-22/customer-churn-analysis"
   },
   {
     id: 3,
+    title: "SQL Retail Insights",
+    category: "Database",
+    techStack: ["MySQL", "SQL Queries", "Window Functions", "CTEs", "Aggregations"],
+    thumbnailUrl: "/projects/sql-retail.svg",
+    images: ["/projects/sql-retail.svg"],
+    shortDescription: "Answered retail sales and customer questions using SQL joins, aggregations, subqueries, and window functions.",
+    fullDescription: "Answered retail sales and customer questions using SQL. Used joins, aggregations, subqueries and window functions to present clear results as structured tables and business summaries.",
+    problemStatement: "Business stakeholders required deep-dive answers into multi-table transactional records, customer buying frequencies, and product performance.",
+    approach: "Wrote high-efficiency SQL queries leveraging multi-table joins, aggregations, CTEs, and window functions to compute sales KPIs.",
+    toolsUsed: ["MySQL", "SQL", "Database Modeling"],
+    insights: [
+      "Answered retail sales and customer questions using SQL.",
+      "Used joins, aggregations, subqueries and window functions.",
+      "Presented results as simple, readable tables and summaries."
+    ],
+    liveUrl: "https://github.com/rishireddy-22/sql-retail-insights",
+    githubUrl: "https://github.com/rishireddy-22/sql-retail-insights"
+  },
+  {
+    id: 4,
     title: "Marketing Campaign Performance Analysis",
     category: "Tableau",
     techStack: ["Excel", "Tableau", "Marketing ROI", "Funnel Analysis"],
@@ -159,10 +179,10 @@ export const mockProjects = [
     insights: [
       "Email delivered the highest ROI (5.4x) followed by Google Ads (3.8x), while LinkedIn yielded the lowest return (1.6x).",
       "Mapped the full conversion funnel: 4.7% overall conversion rate with 18% click-through, 6% lead qualification, and 1.5% final customer acquisition.",
-      "Provided strategic recommendation to reallocate budget from underperforming channels (LinkedIn) into high-return drivers (Email, Google Ads), accelerating Q4 revenue."
+      "Provided strategic recommendation to reallocate budget from underperforming channels into high-return drivers, accelerating revenue."
     ],
     liveUrl: "https://public.tableau.com",
-    githubUrl: "https://github.com/your-username/marketing-campaign-analysis"
+    githubUrl: "https://github.com/rishireddy-22/marketing-campaign-analysis"
   }
 ];
 

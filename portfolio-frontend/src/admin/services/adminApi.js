@@ -351,8 +351,14 @@ export const uploadResumeFile = async (file) => {
     throw new Error('Resume file size cannot exceed 5 MB.');
   }
 
-  // Create local URL for preview and storage
-  const fileUrl = URL.createObjectURL(file);
+  // Convert to persistent Base64 Data URL so it does not expire like blob URLs
+  const fileUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+
   const newResume = {
     id: Date.now(),
     fileName: file.name,
